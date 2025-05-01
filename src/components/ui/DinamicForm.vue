@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    <!-- Cargando JSON -->
     <div v-if="dataStore.loading">
       <v-tooltip text="Favor de Validar y Guardar el JSON" bottom>
         <template v-slot:activator="{ props }">
@@ -8,18 +9,21 @@
       </v-tooltip>
     </div>
 
+    <!-- Formulario dinámico -->
     <div v-else>
       <h1>{{ dataStore.titleForm }}</h1>
 
       <v-form @submit.prevent="submitForm">
         <div v-for="(field, index) in dataStore.dataForm" :key="field.name">
-          <BaseInput
+          <component
+            :is="isSelect(field) ? BaseSelect : BaseInput"
             v-model="formData[field.name]"
             :type="field.type"
             :label="field.label"
             :placeholder="field.label"
+            :items="field.options || []"
             :rules="field.rules"
-            required
+            :required="true"
           />
         </div>
 
@@ -33,22 +37,26 @@
 import { ref, onMounted } from 'vue'
 import { useFormStorage } from '../../stores/configFormStore'
 import BaseInput from './BaseInput.vue'
+import BaseSelect from './BaseSelect.vue'
 
 const dataStore = useFormStorage()
 const formData = ref<Record<string, any>>({})
 
-// Inicializar formData con los valores por defecto
+// Función para detectar si el tipo es seleccionable
+const isSelect = (field: any) => field.type === 'select' || field.type === 'selectable'
+
+// Inicializar campos con valores por defecto
 onMounted(() => {
   if (Array.isArray(dataStore.dataForm)) {
-    const data = {}
+    const data: Record<string, any> = {}
     dataStore.dataForm.forEach((field) => {
-      data[field.name] = field.default || ''
+      data[field.name] = field.default ?? ''
     })
     formData.value = data
   }
 })
 
-// Enviar el formulario
+// Acción del botón Enviar
 function submitForm() {
   console.log('Formulario enviado:', formData.value)
 }
