@@ -30,12 +30,18 @@ const procesarJson = (jsonInicial) => {
     //Primer for para recorrer los campos principales de Fields
     for (let index = 0; index < jsonInicial.fields.length; index++) {
       // console.log('--------',jsonInicial.fields[index].name,'--------')
+      var options = []
+
+      if (jsonInicial.fields[index].options) {
+        options = jsonInicial.fields[index].options
+      }
       finalJson.push({
         name: jsonInicial.fields[index].name,
         label: jsonInicial.fields[index].label,
         type: jsonInicial.fields[index].type,
         default: jsonInicial.fields[index].default,
         value: '',
+        options: options,
       })
       //Segundo for para recorrer las validaciones
       for (let index1 = 0; index1 < jsonInicial.fields[index].validations.length; index1++) {

@@ -34,6 +34,10 @@ Se tomó en cuenta el almacenamiento en torage de lo datos utilizados. Básicame
 
 El presente proyecto demuestra correctamente mis habilidades de desarrollo, ya que en menos de una semana aprendí las bases de Vue con un proyecto muy interesante. La App está funcional y las correcciones que le quedan las voy a ir trabajando con los issues.
 
+# Más info
+
+Los archivos [data.json](https://github.com/c2ksoria/technical_test_tandem/blob/main/src/data/data.json) y [data copy.json](https://github.com/c2ksoria/technical_test_tandem/blob/main/src/data/data%20copy.json) son archivos que se encuentran almacenados en la carpeta [/src/data](https://github.com/c2ksoria/technical_test_tandem/tree/main/src/data). Ambos son archivos de ejemplo; `data.json` es el archivo original de muestra, que viene junto con los requerimeiento del proyecto (es un JSON válido); y `data copy.json` es una copia del anterior, pero modificado para que NO sea un JSON válido. Es decir que ambos han sido agregados con propósitos de poscionarnos en la misma carpeta y así verificar la validez de archivos JSON para la creación de formularios dinámicos.
+
 ## Type Support for `.vue` Imports in TS
 
 TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
