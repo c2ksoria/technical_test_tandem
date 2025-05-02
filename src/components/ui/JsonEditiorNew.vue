@@ -42,7 +42,7 @@ import { storeToRefs } from 'pinia'
 
 import procesarJson from '/src/utils/procesarJson.js'
 import { useFormStorage } from '../../stores/configFormStore'
-
+import validarEstructura from '/src/utils/validator'
 // Variables reactivas
 const jsonText = ref('')
 const isValidJson = ref(false)
@@ -54,13 +54,27 @@ const { loading, dataForm, titleForm } = storeToRefs(formStore)
 
 // Función: validar JSON
 const validateJson = () => {
+  let tipoDeError: 'ninguno' | 'sintaxis' | 'estructura' = 'ninguno'
+
   try {
-    JSON.parse(jsonText.value)
+    const tempJSON = JSON.parse(jsonText.value)
+
+    const validFields = validarEstructura(tempJSON)
+    if (!validFields.valido) {
+      tipoDeError = 'estructura'
+      throw new Error(validFields.error)
+    }
+
     isValidJson.value = true
     validationError.value = ''
   } catch (err: unknown) {
     isValidJson.value = false
-    validationError.value = 'JSON inválido: ' + (err as Error).message
+
+    if (tipoDeError === 'estructura') {
+      validationError.value = '❌ Estructura inválida: ' + (err as Error).message
+    } else {
+      validationError.value = '❌ JSON inválido (sintaxis): ' + (err as Error).message
+    }
   }
 }
 
@@ -68,12 +82,10 @@ const validateJson = () => {
 const saveChanges = () => {
   try {
     const parsed = JSON.parse(jsonText.value)
-    // console.log('Guardando JSON válido:', parsed)
     alert('¡JSON guardado!')
     validationError.value = ''
     const temporal = procesarJson(JSON.parse(jsonText.value))
     if (temporal.success === false) {
-      console.log('hubo error')
       throw new Error('Hubo un error al procesar el archivo, favor de corregirlo')
     }
     dataForm.value = temporal.data
