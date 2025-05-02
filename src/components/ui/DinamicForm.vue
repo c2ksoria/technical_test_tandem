@@ -1,10 +1,10 @@
 <template>
   <v-container>
     <!-- Cargando JSON -->
-    <div v-if="dataStore.loading">
+    <div v-if="dataStore.loading" class="d-flex justify-center align-center" style="height: 300px">
       <v-tooltip text="Favor de Validar y Guardar el JSON" bottom>
         <template v-slot:activator="{ props }">
-          <v-progress-circular v-bind="props" indeterminate />
+          <v-progress-circular v-bind="props" indeterminate color="primary" size="64" />
         </template>
       </v-tooltip>
     </div>
