@@ -127,5 +127,9 @@ const onFileUpload = (file: File | File[] | null) => {
 <style scoped>
 .v-textarea {
   font-family: monospace;
+  width: 100%;
+  height: 300px;
+  overflow: auto;
+  white-space: pre;
 }
 </style>
