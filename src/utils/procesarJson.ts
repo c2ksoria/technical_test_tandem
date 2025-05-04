@@ -1,83 +1,118 @@
-// Función para procesar el JSON de entrada y devolver un nuevo JSON con una nueva estructura acorde al post procesamiento de inputs y sus rules
-const procesarJson = (jsonInicial) => {
-  // console.log('Procesando JSON dentro de procesarJson')
-  const finalJson = []
-  var tempValidations = []
-  var rules = []
-  var success = true
-  var errorMessage = ''
+// Tipos
+type Validation = {
+  type: string
+  value?: string
+  message?: string
+  pattern?: string
+}
 
-  // Función para detectar el tipo de validación y devolver la función de validación a procesar dependiendo del tipo de validación
-  const detectTypeInput = (validatioType, value, message, pattern) => {
-    switch (validatioType) {
-      case 'required':
-        return (v) => !!v || message
-      case 'minLength':
-        return (v) => v.length >= value || message
-      case 'maxLength':
-        return (v) => v.length < value || message
-      case 'regex': {
-        // console.log(pattern)
+type Field = {
+  name: string
+  label: string
+  type: string
+  default?: string
+  options?: string[]
+  validations: Validation[]
+}
+
+type InputJson = {
+  fields: Field[]
+}
+
+type FieldProcessed = {
+  name: string
+  label: string
+  type: string
+  default?: string
+  value: string
+  options: string[]
+  validations: Validation[]
+  rules: ((v: any) => boolean | string)[]
+}
+
+type ProcessedResult = {
+  success: boolean
+  errorMessage: string
+  data: FieldProcessed[]
+}
+
+// Función auxiliar para detectar el tipo de validación
+const detectTypeInput = (
+  validationType: string,
+  value: string,
+  message: string,
+  pattern: string,
+): ((v: any) => boolean | string) => {
+  switch (validationType) {
+    case 'required':
+      return (v) => !!v || message
+    case 'minLength':
+      return (v) => v.length >= parseInt(value) || message
+    case 'maxLength':
+      return (v) => v.length <= parseInt(value) || message
+    case 'regex':
+      try {
         const regex = new RegExp(pattern)
         return (v) => regex.test(v) || message
+      } catch {
+        return () => `Error en expresión regular: ${pattern}`
       }
-      default:
-        return ''
-    }
+    default:
+      return () => ''
   }
-  // Procesamiento del JSON de entrada
+}
+
+// Función principal
+const procesarJson = (jsonInicial: InputJson): ProcessedResult => {
+  const finalJson: FieldProcessed[] = []
+  let tempValidations: Validation[] = []
+  let rules: ((v: any) => boolean | string)[] = []
+  let success = true
+  let errorMessage = ''
+
   try {
-    //Primer for para recorrer los campos principales de Fields
     for (let index = 0; index < jsonInicial.fields.length; index++) {
-      // console.log('--------',jsonInicial.fields[index].name,'--------')
-      var options = []
+      const field = jsonInicial.fields[index]
+      const options = field.options || []
 
-      if (jsonInicial.fields[index].options) {
-        options = jsonInicial.fields[index].options
-      }
       finalJson.push({
-        name: jsonInicial.fields[index].name,
-        label: jsonInicial.fields[index].label,
-        type: jsonInicial.fields[index].type,
-        default: jsonInicial.fields[index].default,
+        name: field.name,
+        label: field.label,
+        type: field.type,
+        default: field.default,
         value: '',
-        options: options,
+        options,
+        validations: [],
+        rules: [],
       })
-      //Segundo for para recorrer las validaciones
-      for (let index1 = 0; index1 < jsonInicial.fields[index].validations.length; index1++) {
-        var tempPattern = ''
-        if (jsonInicial.fields[index].validations[index1].pattern) {
-          tempPattern = jsonInicial.fields[index].validations[index1].pattern
-        }
-        const datos = detectTypeInput(
-          jsonInicial.fields[index].validations[index1].type,
-          jsonInicial.fields[index].validations[index1].value || '',
-          jsonInicial.fields[index].validations[index1].message || '',
-          tempPattern || '',
-        )
-        // Asiganción de la función de validación a la regla
-        rules.push(datos)
 
-        //Crear arreglo de validaciones por campo unitario de Fields
+      for (let i = 0; i < field.validations.length; i++) {
+        const v = field.validations[i]
+        const pattern = v.pattern || ''
+        const ruleFn = detectTypeInput(v.type, v.value || '', v.message || '', pattern)
+
+        rules.push(ruleFn)
         tempValidations.push({
-          type: jsonInicial.fields[index].validations[index1].type,
-          value: jsonInicial.fields[index].validations[index1].value || '',
-          message: jsonInicial.fields[index].validations[index1].message || '',
-          pattern: jsonInicial.fields[index].validations[index1].pattern || '',
+          type: v.type,
+          value: v.value || '',
+          message: v.message || '',
+          pattern: pattern,
         })
       }
-      //Agregar validaciones a cada campo unitario de Fields
+
       finalJson[index].validations = tempValidations
-      //Agregar reglas a cada campo unitario de Fields
       finalJson[index].rules = rules
-      //reseteo de variables temporales
+
+      // Reset
       tempValidations = []
       rules = []
     }
-  } catch (error) {
-    errorMessage = 'Hubo un Error en el procesamiento, error:' & error
+  } catch (error: any) {
+    errorMessage = 'Hubo un Error en el procesamiento: ' + error.message
     success = false
   }
-  return { success: success, errorMessage: errorMessage, data: finalJson }
+
+  return { success, errorMessage, data: finalJson }
 }
+
 export default procesarJson
