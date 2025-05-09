@@ -1,45 +1,67 @@
-export function makeRules(field: {
-  validations: Array<{
-    type: string
-    value?: number
-    pattern?: string
-    message: string
-  }>
-}): Array<(v: any) => boolean | string> {
-  return field.validations.map((v) => {
-    // log al crear la regla
-    console.log(`🛠 Creando regla "${v.type}" para el campo`, field.name)
+type FormData = { [key: string]: any }
 
-    switch (v.type) {
-      case 'required':
-        // devolvemos la función que luego ejecutará Vuetify,
-        // y dentro de ella ya existe 'value'
-        return (value: any) => {
-          console.log(`🔍 Ejecutando "required" con valor:`, value)
-          return !!value || v.message
-        }
+type FormRule =
+  | {
+      type: 'range'
+      field: string
+      min: number
+      max: number
+      message: string
+    }
+  | {
+      type: 'domain'
+      field: string
+      allowedDomains: [string]
+      message: string
+    }
+  | {
+      type: 'matchField'
+      field: string
+      target: string
+      message: string
+    }
 
-      case 'minLength':
-        return (value: string) => {
-          console.log(`🔍 Ejecutando "minLength >= ${v.value}" con valor:`, value)
-          return value?.length >= (v.value ?? 0) || v.message
-        }
+export function validateFormRules(
+  formData: FormData,
+  formRules: FormRule[],
+  errorMessage: { value: string | null },
+): boolean {
+  errorMessage.value = null // reset
 
-      case 'maxLength':
-        return (value: string) => {
-          console.log(`🔍 Ejecutando "maxLength <= ${v.value}" con valor:`, value)
-          return value?.length <= (v.value ?? 0) || v.message
-        }
+  for (const rule of formRules) {
+    const value = formData[rule.field]
 
-      case 'regex':
-        const re = new RegExp(v.pattern || '')
-        return (value: string) => {
-          console.log(`🔍 Ejecutando "regex ${v.pattern}" con valor:`, value)
-          return re.test(value || '') || v.message
+    switch (rule.type) {
+      case 'range':
+        if (isNaN(value) || value < rule.min || value > rule.max) {
+          errorMessage.value = rule.message
+          return false
         }
+        break
+
+      case 'domain':
+        if (
+          typeof value !== 'string' ||
+          !rule.allowedDomains.some((domain) => value.endsWith(`@${domain}`))
+        ) {
+          errorMessage.value = rule.message
+          return false
+        }
+        break
+
+      case 'matchField':
+        const targetValue = formData[rule.target]
+        if (value !== targetValue) {
+          errorMessage.value = rule.message
+          return false
+        }
+        break
 
       default:
-        return () => true
+        console.warn(`Tipo de regla no reconocida: ${rule.type}`)
+        break
     }
-  })
+  }
+
+  return true
 }
