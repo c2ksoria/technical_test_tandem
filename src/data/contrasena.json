@@ -1,0 +1,68 @@
+{
+    "formTitle": "Registro de Usuario",
+    "fields": [
+      {
+        "name": "password",
+        "label": "Contraseña",
+        "type": "password",
+        "default": "",
+        "validations": [
+          {
+            "type": "required",
+            "message": "La contraseña es obligatoria."
+          },
+          {
+            "type": "minLength",
+            "value": 8,
+            "message": "La contraseña debe tener al menos 8 caracteres."
+          },
+          {
+            "type": "maxLength",
+            "value": 20,
+            "message": "La contraseña debe tener como máximo 20 caracteres."
+          },
+          {
+            "type": "regex",
+            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).+$",
+            "message": "La contraseña debe incluir mayúsculas, minúsculas y números."
+          }
+        ]
+      },
+      {
+        "name": "confirmPassword",
+        "label": "Repetir Contraseña",
+        "type": "password",
+        "default": "",
+        "validations": [
+          {
+            "type": "required",
+            "message": "Debes repetir la contraseña."
+          },
+          {
+            "type": "minLength",
+            "value": 8,
+            "message": "Debe tener al menos 8 caracteres."
+          },
+          {
+            "type": "maxLength",
+            "value": 20,
+            "message": "Debe tener como máximo 20 caracteres."
+          },
+          {
+            "type": "regex",
+            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).+$",
+            "message": "Debe incluir mayúsculas, minúsculas y números."
+          }
+        ]
+      }
+    ],
+    "formRules": [
+      {
+        "type": "matchField",
+        "field": "confirmPassword",
+        "target": "password",
+        "message": "Las contraseñas no coinciden."
+      }
+    ]
+  }
+  
