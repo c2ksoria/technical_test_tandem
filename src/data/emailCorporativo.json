@@ -1,0 +1,31 @@
+{
+    "formTitle": "Registro Corporativo",
+    "fields": [
+      {
+        "name": "emailCorporativo",
+        "label": "Email Corporativo",
+        "type": "email",
+        "default": "",
+        "validations": [
+          {
+            "type": "required",
+            "message": "El correo corporativo es obligatorio."
+          },
+          {
+            "type": "regex",
+            "pattern": "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$",
+            "message": "El formato del correo es inválido."
+          }
+        ]
+      }
+    ],
+    "formRules": [
+      {
+        "type": "domain",
+        "field": "emailCorporativo",
+        "allowedDomains": ["miempresa.com", "corporativo.org"],
+        "message": "El correo debe pertenecer a un dominio corporativo autorizado."
+      }
+    ]
+  }
+  

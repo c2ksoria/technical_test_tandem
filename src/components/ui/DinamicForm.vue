@@ -13,7 +13,7 @@
     <div v-else>
       <h1>{{ dataStore.titleForm }}</h1>
 
-      <v-form @submit.prevent="submitForm">
+      <v-form ref="formRef" @submit.prevent="submitForm">
         <div v-for="(field, index) in dataStore.dataForm" :key="field.name">
           <component
             :is="isSelect(field) ? BaseSelect : BaseInput"
@@ -38,6 +38,10 @@ import { ref, onMounted } from 'vue'
 import { useFormStorage } from '../../stores/configFormStore'
 import BaseInput from './BaseInput.vue'
 import BaseSelect from './BaseSelect.vue'
+import { validateFormRules } from '../../utils/formRules'
+
+const formRef = ref()
+const errorMessage = ref<string | null>(null)
 
 const dataStore = useFormStorage()
 const formData = ref<Record<string, any>>({})
@@ -58,6 +62,21 @@ onMounted(() => {
 
 // Acción del botón Enviar
 function submitForm() {
-  console.log('Formulario enviado:', formData.value)
+  const isLocalValid = formRef.value?.validate()
+
+  if (!isLocalValid) {
+    errorMessage.value = 'Por favor corrige los campos indicados.'
+    return
+  }
+
+  const isFormValid = validateFormRules(formData.value, dataStore.formRules, errorMessage)
+
+  if (!isFormValid) {
+    console.log("Fomulario inválido:", errorMessage.value)
+    return
+  }
+
+  // Todo válido: enviar datos
+  console.log('✅ Formulario válido:', formData.value)
 }
 </script>

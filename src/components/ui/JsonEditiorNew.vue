@@ -50,7 +50,7 @@ const validationError = ref('')
 
 // Instanciás el store
 const formStore = useFormStorage()
-const { loading, dataForm, titleForm } = storeToRefs(formStore)
+const { loading, dataForm, titleForm, formRules } = storeToRefs(formStore)
 
 // Función: validar JSON
 const validateJson = () => {
@@ -82,7 +82,6 @@ const validateJson = () => {
 const saveChanges = () => {
   try {
     const parsed = JSON.parse(jsonText.value)
-    alert('¡JSON guardado!')
     validationError.value = ''
     const temporal = procesarJson(JSON.parse(jsonText.value))
     if (temporal.success === false) {
@@ -90,7 +89,9 @@ const saveChanges = () => {
     }
     dataForm.value = temporal.data
     titleForm.value = parsed.formTitle
+    formRules.value = parsed.formRules
     loading.value = false
+    alert('¡JSON guardado!')
     isValidJson.value = false // 🔥 Reseteamos el estado
   } catch (error) {
     console.log(error)

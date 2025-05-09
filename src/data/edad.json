@@ -1,0 +1,27 @@
+{
+    "formTitle": "Registro de Edad",
+    "fields": [
+      {
+        "name": "edad",
+        "label": "Edad",
+        "type": "number",
+        "default": "",
+        "validations": [
+          {
+            "type": "required",
+            "message": "La edad es obligatoria."
+          }
+        ]
+      }
+    ],
+    "formRules": [
+      {
+        "type": "range",
+        "field": "edad",
+        "min": 18,
+        "max": 65,
+        "message": "La edad debe estar entre 18 y 65 años."
+      }
+    ]
+  }
+  
