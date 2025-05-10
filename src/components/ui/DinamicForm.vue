@@ -67,34 +67,48 @@ onMounted(() => {
 })
 
 function showMessage(mensaje: string) {
-  alertMessage.value = mensaje
   showAlert.value = true
+  alertMessage.value = mensaje
   console.log(showAlert.value)
 }
 
+function resetForm() {
+  formRef.value.reset() // reinicia los valores visuales
+  formRef.value.resetValidation() // limpia validaciones
+}
+
 // Acción del botón Enviar
-function submitForm() {
-  const isLocalValid = formRef.value?.validate()
+async function submitForm() {
+  const result = await formRef.value?.validate()
 
-  if (!isLocalValid) {
+  if (result?.valid) {
+    // Validar reglas de validación
+    if (dataStore.formRules === undefined) {
+      // Si no hay reglas de validación globales
+      typeAlert.value = 'success'
+      alertMessage.value = 'Formulario enviado con éxito.'
+      showMessage(alertMessage.value)
+      resetForm()
+    } else {
+      // Hay reglas de validación globales
+      const isFormValid = validateFormRules(formData.value, dataStore.formRules, alertMessage)
+      if (!isFormValid || !Array.isArray(dataStore.formRules)) {
+        typeAlert.value = 'error'
+        showMessage(alertMessage.value)
+        return
+      } else {
+        console.log('✅ Formulario válido:', formData.value)
+        typeAlert.value = 'success'
+        alertMessage.value = 'Formulario enviado con éxito.'
+        showMessage(alertMessage.value)
+        resetForm()
+      }
+    }
+  } else {
+    // Mostrar errores
     alertMessage.value = 'Por favor corrige los campos indicados.'
-    return
-  }
-
-  const isFormValid = validateFormRules(formData.value, dataStore.formRules, alertMessage)
-
-  if (!isFormValid) {
-    // console.log('Fomulario inválido:', alertMessage.value)
     typeAlert.value = 'error'
     showMessage(alertMessage.value)
-    return
-  } else {
-    // console.log('✅ Formulario válido:', formData.value)
-    typeAlert.value = 'success'
-    alertMessage.value = 'Formulario enviado con éxito.'
-    showMessage(alertMessage.value)
   }
-
-  // Todo válido: enviar datos
 }
 </script>
