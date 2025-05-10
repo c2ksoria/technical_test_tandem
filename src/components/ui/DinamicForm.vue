@@ -28,6 +28,11 @@
         </div>
 
         <v-btn type="submit" class="mt-4" color="primary">Enviar</v-btn>
+        <div class="mt-4">
+          <v-alert v-model="showAlert" :type="typeAlert" closable>
+            {{ alertMessage }}
+          </v-alert>
+        </div>
       </v-form>
     </div>
   </v-container>
@@ -41,8 +46,9 @@ import BaseSelect from './BaseSelect.vue'
 import { validateFormRules } from '../../utils/formRules'
 
 const formRef = ref()
-const errorMessage = ref<string | null>(null)
-
+const alertMessage = ref<string | null>(null)
+const showAlert = ref(false)
+const typeAlert = ref('error')
 const dataStore = useFormStorage()
 const formData = ref<Record<string, any>>({})
 
@@ -60,23 +66,49 @@ onMounted(() => {
   }
 })
 
+function showMessage(mensaje: string) {
+  showAlert.value = true
+  alertMessage.value = mensaje
+  console.log(showAlert.value)
+}
+
+function resetForm() {
+  formRef.value.reset() // reinicia los valores visuales
+  formRef.value.resetValidation() // limpia validaciones
+}
+
 // Acción del botón Enviar
-function submitForm() {
-  const isLocalValid = formRef.value?.validate()
+async function submitForm() {
+  const result = await formRef.value?.validate()
 
-  if (!isLocalValid) {
-    errorMessage.value = 'Por favor corrige los campos indicados.'
-    return
+  if (result?.valid) {
+    // Validar reglas de validación
+    if (dataStore.formRules === undefined) {
+      // Si no hay reglas de validación globales
+      typeAlert.value = 'success'
+      alertMessage.value = 'Formulario enviado con éxito.'
+      showMessage(alertMessage.value)
+      resetForm()
+    } else {
+      // Hay reglas de validación globales
+      const isFormValid = validateFormRules(formData.value, dataStore.formRules, alertMessage)
+      if (!isFormValid || !Array.isArray(dataStore.formRules)) {
+        typeAlert.value = 'error'
+        showMessage(alertMessage.value)
+        return
+      } else {
+        console.log('✅ Formulario válido:', formData.value)
+        typeAlert.value = 'success'
+        alertMessage.value = 'Formulario enviado con éxito.'
+        showMessage(alertMessage.value)
+        resetForm()
+      }
+    }
+  } else {
+    // Mostrar errores
+    alertMessage.value = 'Por favor corrige los campos indicados.'
+    typeAlert.value = 'error'
+    showMessage(alertMessage.value)
   }
-
-  const isFormValid = validateFormRules(formData.value, dataStore.formRules, errorMessage)
-
-  if (!isFormValid) {
-    console.log("Fomulario inválido:", errorMessage.value)
-    return
-  }
-
-  // Todo válido: enviar datos
-  console.log('✅ Formulario válido:', formData.value)
 }
 </script>
