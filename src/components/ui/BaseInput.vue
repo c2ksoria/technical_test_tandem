@@ -21,7 +21,7 @@ import type { PropType } from 'vue'
 defineProps({
   modelValue: {
     type: String,
-    required: true,
+    default: '',
   },
   label: {
     type: String,
@@ -33,10 +33,10 @@ defineProps({
   },
   type: {
     type: String,
-    default: 'text',
+    default: '',
   },
   rules: {
-    type: Array as PropType<Array<(v: string) => boolean | string>>,
+    type: Array as PropType<Array<(v: string) => boolean | string | number>>,
     default: () => [],
   },
   disabled: {
