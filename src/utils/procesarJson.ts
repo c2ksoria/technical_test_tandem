@@ -47,9 +47,9 @@ const detectTypeInput = (
     case 'required':
       return (v) => !!v || message
     case 'minLength':
-      return (v) => v.length >= parseInt(value) || message
+      return (v) => String(v).length >= parseInt(value) || message
     case 'maxLength':
-      return (v) => v.length <= parseInt(value) || message
+      return (v) => String(v).length <= parseInt(value) || message
     case 'regex':
       try {
         const regex = new RegExp(pattern)
