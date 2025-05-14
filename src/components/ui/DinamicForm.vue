@@ -26,7 +26,7 @@
             :required="true"
           />
         </div>
-
+        <v-switch v-model="simulateError" label="Simular error en el envío" color="red" />
         <v-btn type="submit" class="mt-4" color="primary">Enviar</v-btn>
         <div class="mt-4">
           <v-alert v-model="showAlert" :type="typeAlert" closable>
@@ -44,6 +44,7 @@ import { useFormStorage } from '../../stores/configFormStore'
 import BaseInput from './BaseInput.vue'
 import BaseSelect from './BaseSelect.vue'
 import { validateFormRules } from '../../utils/formRules'
+import axios from 'axios' // Asegurate de tenerlo instalado con: npm install axios
 
 const formRef = ref()
 const alertMessage = ref<string | null>(null)
@@ -66,10 +67,10 @@ onMounted(() => {
   }
 })
 
-function showMessage(mensaje: string) {
-  showAlert.value = true
+function displayAlert(mensaje: string, tipo: string = 'error') {
   alertMessage.value = mensaje
-  console.log(showAlert.value)
+  typeAlert.value = tipo
+  showAlert.value = true
 }
 
 function resetForm() {
@@ -78,37 +79,41 @@ function resetForm() {
 }
 
 // Acción del botón Enviar
+
+const simulateError = ref(false) // ← Podés vincularlo a un toggle o checkbox
+
 async function submitForm() {
   const result = await formRef.value?.validate()
 
-  if (result?.valid) {
-    // Validar reglas de validación
-    if (dataStore.formRules === undefined) {
-      // Si no hay reglas de validación globales
-      typeAlert.value = 'success'
-      alertMessage.value = 'Formulario enviado con éxito.'
-      showMessage(alertMessage.value)
-      resetForm()
-    } else {
-      // Hay reglas de validación globales
-      const isFormValid = validateFormRules(formData.value, dataStore.formRules, alertMessage)
-      if (!isFormValid || !Array.isArray(dataStore.formRules)) {
-        typeAlert.value = 'error'
-        showMessage(alertMessage.value)
-        return
-      } else {
-        console.log('✅ Formulario válido:', formData.value)
-        typeAlert.value = 'success'
-        alertMessage.value = 'Formulario enviado con éxito.'
-        showMessage(alertMessage.value)
-        resetForm()
-      }
+  if (!result?.valid) {
+    return displayAlert('Por favor corrige los campos indicados.', 'error')
+  }
+
+  const hasGlobalRules = Array.isArray(dataStore.formRules) && dataStore.formRules.length > 0
+
+  if (hasGlobalRules) {
+    const isFormValid = validateFormRules(formData.value, dataStore.formRules, alertMessage)
+
+    if (!isFormValid) {
+      return displayAlert(alertMessage.value || 'Formulario inválido.', 'error')
     }
-  } else {
-    // Mostrar errores
-    alertMessage.value = 'Por favor corrige los campos indicados.'
-    typeAlert.value = 'error'
-    showMessage(alertMessage.value)
+  }
+
+  // 🎯 Todo válido: simular envío
+  try {
+    const apiURL = simulateError.value
+      ? 'https://api.invalida.com/error' // ❌ URL inválida para forzar error
+      : 'https://jsonplaceholder.typicode.com/posts' // ✅ API falsa válida
+
+    const response = await axios.post(apiURL, formData.value)
+
+    console.log('📡 Respuesta del servidor:', response.data)
+
+    displayAlert('✅ Formulario enviado con éxito.', 'success')
+    resetForm()
+  } catch (err: any) {
+    console.error('❌ Error en la API:', err.message || err)
+    displayAlert('Error al enviar el formulario. Intenta nuevamente.', 'error')
   }
 }
 </script>
