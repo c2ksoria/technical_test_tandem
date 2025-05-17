@@ -34,28 +34,6 @@ Se tomó en cuenta el almacenamiento en torage de lo datos utilizados. Básicame
 
 El presente proyecto demuestra correctamente mis habilidades de desarrollo, ya que en menos de una semana aprendí las bases de Vue con un proyecto muy interesante. La App está funcional y las correcciones que le quedan las voy a ir trabajando con los issues.
 
-# Más info en Wiki
+# Más info en Wiki / More info on Wiki
 
 Para más información sobre el uso de la aplicación favor de visitar la [wiki](https://github.com/c2ksoria/technical_test_tandem/wiki) del proyecto:
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
